@@ -53,5 +53,7 @@ secrets/
 coverage.out
 coverage.html
 
-# Claude Code
-.claude/
+# Claude Code (ignore all except skills and commands)
+.claude/*
+!.claude/skills/
+!.claude/commands/
