@@ -1,6 +1,6 @@
 # Binaries
-prisn
-prisn-*
+/prisn
+/prisn-*
 *.exe
 *.exe~
 *.dll

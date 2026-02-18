@@ -6,8 +6,31 @@ prisn provides a native Kubernetes operator for running scripts and services in 
 
 ### Install the Operator
 
+**Option 1: Helm (recommended)**
+
 ```bash
-# Clone and install CRDs + operator
+# From local checkout
+git clone https://github.com/lajosnagyuk/prisn.git
+helm install prisn-operator prisn/charts/prisn-operator \
+  --namespace prisn-system --create-namespace
+
+# Verify installation
+kubectl get pods -n prisn-system
+kubectl get crds | grep prisn
+```
+
+To use a custom image (e.g., from a private registry):
+
+```bash
+helm install prisn-operator prisn/charts/prisn-operator \
+  --namespace prisn-system --create-namespace \
+  --set image.repository=your-registry.example.com/prisn-operator \
+  --set image.tag=v0.1.0
+```
+
+**Option 2: Kustomize**
+
+```bash
 git clone https://github.com/lajosnagyuk/prisn.git
 kubectl apply -k prisn/operator/config/default
 
@@ -16,8 +39,7 @@ kubectl get pods -n prisn-system
 kubectl get crds | grep prisn
 ```
 
-The operator image defaults to `ghcr.io/lajosnagyuk/prisn-operator:latest`. To use
-a custom image (e.g., from a private registry), override after install:
+To use a custom image with kustomize, override after install:
 
 ```bash
 kubectl -n prisn-system set image deployment/prisn-operator \
@@ -478,11 +500,14 @@ kubectl describe pvc my-api-storage-data
 ## Uninstall
 
 ```bash
-# Delete all prisn resources in namespace
+# Delete all prisn resources first
 kubectl delete prisnapps,prisnjobs,prisncronjobs --all
 
-# Uninstall operator
-kubectl delete -k github.com/lajosnagyuk/prisn/operator/config/default
+# Uninstall operator (Helm)
+helm uninstall prisn-operator -n prisn-system
+
+# Or uninstall operator (kustomize)
+kubectl delete -k prisn/operator/config/default
 ```
 
 ## Examples

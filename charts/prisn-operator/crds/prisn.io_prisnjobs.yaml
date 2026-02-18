@@ -1,0 +1,182 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: prisnjobs.prisn.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: prisn.io
+  names:
+    kind: PrisnJob
+    listKind: PrisnJobList
+    plural: prisnjobs
+    singular: prisnjob
+    shortNames:
+      - pj
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Duration
+          type: string
+          jsonPath: .status.duration
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: PrisnJob is the Schema for the prisnjobs API
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              description: PrisnJobSpec defines the desired state of PrisnJob
+              required:
+                - source
+              properties:
+                source:
+                  type: object
+                  description: Source is the script to run
+                  properties:
+                    inline:
+                      type: string
+                    configMapRef:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                      required:
+                        - name
+                    secretRef:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                      required:
+                        - name
+                    git:
+                      type: object
+                      required:
+                        - url
+                      properties:
+                        url:
+                          type: string
+                        ref:
+                          type: string
+                          default: main
+                        path:
+                          type: string
+                        secretRef:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                          required:
+                            - name
+                    entrypoint:
+                      type: string
+                runtime:
+                  type: string
+                  enum: [python, python3, node, bash]
+                  default: python3
+                args:
+                  type: array
+                  items:
+                    type: string
+                env:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                envFrom:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                resources:
+                  type: object
+                  properties:
+                    cpu:
+                      type: string
+                    memory:
+                      type: string
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                timeout:
+                  type: string
+                  default: 1h
+                  description: Maximum execution time
+                backoffLimit:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                  default: 3
+                  description: Number of retries before marking failed
+                ttlSecondsAfterFinished:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                  description: Cleanup completed jobs after this duration
+                serviceAccountName:
+                  type: string
+                nodeSelector:
+                  type: object
+                  additionalProperties:
+                    type: string
+                tolerations:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+            status:
+              type: object
+              description: PrisnJobStatus defines the observed state
+              properties:
+                phase:
+                  type: string
+                  enum: [Pending, Running, Succeeded, Failed]
+                startTime:
+                  type: string
+                  format: date-time
+                completionTime:
+                  type: string
+                  format: date-time
+                duration:
+                  type: string
+                exitCode:
+                  type: integer
+                  format: int32
+                retries:
+                  type: integer
+                  format: int32
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                observedGeneration:
+                  type: integer
+                  format: int64
+                message:
+                  type: string
+                jobName:
+                  type: string

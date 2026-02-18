@@ -1,0 +1,21 @@
+apiVersion: v2
+name: prisn-operator
+description: A Helm chart for prisn Kubernetes Operator - run scripts anywhere with automatic dependency management
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - prisn
+  - serverless
+  - scripts
+  - kubernetes
+  - operator
+home: https://github.com/lajosnagyuk/prisn
+sources:
+  - https://github.com/lajosnagyuk/prisn
+maintainers:
+  - name: Lajos Nagy
+    url: https://github.com/lajosnagyuk
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/license: MIT

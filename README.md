@@ -138,7 +138,11 @@ Raft consensus ensures state is replicated across all nodes. Leader handles writ
 For Kubernetes-native deployment, use the prisn operator:
 
 ```bash
-# Install CRDs and operator
+# Install via Helm
+helm install prisn-operator ./charts/prisn-operator \
+  --namespace prisn-system --create-namespace
+
+# Or via kustomize
 git clone https://github.com/lajosnagyuk/prisn.git
 kubectl apply -k prisn/operator/config/default
 
