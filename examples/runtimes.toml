@@ -1,0 +1,230 @@
+# Example Custom Runtimes for prisn
+#
+# Copy this file to ~/.prisn/runtimes.toml and customize as needed.
+# See docs/CUSTOM-RUNTIMES.md for full documentation.
+
+# Zig - Systems programming language
+[runtime.zig]
+name = "Zig"
+extensions = [".zig"]
+command = "zig"
+args = ["run", "{script}"]
+
+[runtime.zig.detect]
+check = "zig version"
+
+[runtime.zig.install]
+macos = "brew install zig"
+linux = "snap install zig --classic"
+doc_url = "https://ziglang.org/download/"
+
+# Nushell - Modern shell
+[runtime.nushell]
+name = "Nushell"
+extensions = [".nu"]
+command = "nu"
+args = ["{script}"]
+shebang_patterns = ["^#!.*nu"]
+
+[runtime.nushell.detect]
+check = "nu --version"
+
+[runtime.nushell.install]
+macos = "brew install nushell"
+linux = "cargo install nu"
+
+# Fish Shell
+[runtime.fish]
+name = "Fish Shell"
+extensions = [".fish"]
+command = "fish"
+args = ["{script}"]
+
+[runtime.fish.detect]
+check = "fish --version"
+
+[runtime.fish.install]
+macos = "brew install fish"
+linux = "apt-get install fish"
+
+# Elixir
+[runtime.elixir]
+name = "Elixir"
+extensions = [".exs"]
+command = "elixir"
+args = ["{script}"]
+
+[runtime.elixir.detect]
+check = "elixir --version"
+version_regex = "Elixir (\\d+\\.\\d+\\.\\d+)"
+
+[runtime.elixir.install]
+macos = "brew install elixir"
+linux = "apt-get install elixir"
+
+[runtime.elixir.deps]
+enabled = true
+manifest_files = ["mix.exs"]
+install_command = "mix deps.get"
+self_managed = true
+
+# Crystal
+[runtime.crystal]
+name = "Crystal"
+extensions = [".cr"]
+command = "crystal"
+args = ["run", "{script}"]
+
+[runtime.crystal.detect]
+check = "crystal --version"
+
+[runtime.crystal.install]
+macos = "brew install crystal"
+
+[runtime.crystal.deps]
+enabled = true
+manifest_files = ["shard.yml"]
+install_command = "shards install"
+self_managed = true
+
+# Nim
+[runtime.nim]
+name = "Nim"
+extensions = [".nim"]
+command = "nim"
+args = ["r", "{script}"]
+
+[runtime.nim.detect]
+check = "nim --version"
+
+[runtime.nim.install]
+macos = "brew install nim"
+script = "https://nim-lang.org/choosenim/init.sh"
+
+# V Language
+[runtime.v]
+name = "V"
+extensions = [".v"]
+command = "v"
+args = ["run", "{script}"]
+
+[runtime.v.detect]
+check = "v version"
+
+[runtime.v.install]
+script = "https://github.com/vlang/v/releases/latest/download/v_linux.zip"
+
+# Haskell (runhaskell)
+[runtime.haskell]
+name = "Haskell"
+extensions = [".hs"]
+command = "runhaskell"
+args = ["{script}"]
+
+[runtime.haskell.detect]
+check = "ghc --version"
+
+[runtime.haskell.install]
+script = "https://get-ghcup.haskell.org"
+
+# OCaml
+[runtime.ocaml]
+name = "OCaml"
+extensions = [".ml"]
+command = "ocaml"
+args = ["{script}"]
+
+[runtime.ocaml.detect]
+check = "ocaml --version"
+
+[runtime.ocaml.install]
+macos = "brew install ocaml"
+linux = "apt-get install ocaml"
+
+# Groovy
+[runtime.groovy]
+name = "Groovy"
+extensions = [".groovy"]
+command = "groovy"
+args = ["{script}"]
+
+[runtime.groovy.detect]
+check = "groovy --version"
+
+[runtime.groovy.install]
+macos = "brew install groovy"
+
+# Kotlin Script
+[runtime.kotlin]
+name = "Kotlin Script"
+extensions = [".kts"]
+command = "kotlin"
+args = ["{script}"]
+
+[runtime.kotlin.detect]
+check = "kotlin -version"
+
+[runtime.kotlin.install]
+macos = "brew install kotlin"
+
+# Scala (scala-cli)
+[runtime.scala]
+name = "Scala"
+extensions = [".scala", ".sc"]
+command = "scala-cli"
+args = ["run", "{script}"]
+
+[runtime.scala.detect]
+check = "scala-cli version"
+
+[runtime.scala.install]
+script = "https://scala-cli.virtuslab.org/get"
+
+# Racket
+[runtime.racket]
+name = "Racket"
+extensions = [".rkt"]
+command = "racket"
+args = ["{script}"]
+
+[runtime.racket.detect]
+check = "racket --version"
+
+[runtime.racket.install]
+macos = "brew install racket"
+linux = "apt-get install racket"
+
+[runtime.racket.deps]
+enabled = true
+install_command = "raco pkg install {deps}"
+self_managed = false
+
+# Tcl
+[runtime.tcl]
+name = "Tcl"
+extensions = [".tcl"]
+command = "tclsh"
+args = ["{script}"]
+
+[runtime.tcl.detect]
+check = "tclsh <<< 'puts [info patchlevel]'"
+
+# AWK
+[runtime.awk]
+name = "AWK"
+extensions = [".awk"]
+command = "awk"
+args = ["-f", "{script}"]
+
+[runtime.awk.deps]
+enabled = false
+
+# GNU Make (as a script runner)
+[runtime.make]
+name = "GNU Make"
+extensions = [".mk", "Makefile"]
+command = "make"
+args = ["-f", "{script}"]
+
+[runtime.make.deps]
+enabled = false

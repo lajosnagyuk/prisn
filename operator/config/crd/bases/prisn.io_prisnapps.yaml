@@ -1,0 +1,302 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: prisnapps.prisn.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: prisn.io
+  names:
+    kind: PrisnApp
+    listKind: PrisnAppList
+    plural: prisnapps
+    singular: prisnapp
+    shortNames:
+      - pa
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+        scale:
+          specReplicasPath: .spec.replicas
+          statusReplicasPath: .status.replicas
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Replicas
+          type: integer
+          jsonPath: .status.replicas
+        - name: Ready
+          type: integer
+          jsonPath: .status.readyReplicas
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: PrisnApp is the Schema for the prisnapps API
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              description: PrisnAppSpec defines the desired state of PrisnApp
+              required:
+                - source
+              properties:
+                source:
+                  type: object
+                  description: Source is the script or directory to run
+                  properties:
+                    inline:
+                      type: string
+                      description: Inline code (for simple scripts)
+                    configMapRef:
+                      type: object
+                      description: ConfigMapRef references a ConfigMap containing the code
+                      properties:
+                        name:
+                          type: string
+                      required:
+                        - name
+                    secretRef:
+                      type: object
+                      description: SecretRef references a Secret containing the code
+                      properties:
+                        name:
+                          type: string
+                      required:
+                        - name
+                    git:
+                      type: object
+                      description: Git repository to clone
+                      required:
+                        - url
+                      properties:
+                        url:
+                          type: string
+                          description: URL is the git repository URL
+                        ref:
+                          type: string
+                          default: main
+                          description: Ref is the git reference (branch, tag, or commit)
+                        path:
+                          type: string
+                          description: Path is the subdirectory within the repo
+                        secretRef:
+                          type: object
+                          description: SecretRef for authentication
+                          properties:
+                            name:
+                              type: string
+                          required:
+                            - name
+                    entrypoint:
+                      type: string
+                      description: Entrypoint is the script to execute
+                runtime:
+                  type: string
+                  description: Runtime specifies the execution runtime
+                  enum: [python, python3, node, bash]
+                  default: python3
+                replicas:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                  maximum: 100
+                  default: 1
+                  description: Replicas is the desired number of instances
+                port:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  maximum: 65535
+                  description: Port the app listens on
+                args:
+                  type: array
+                  items:
+                    type: string
+                  description: Command-line arguments
+                env:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  description: Environment variables
+                envFrom:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  description: Environment variable sources
+                resources:
+                  type: object
+                  description: Compute resource requirements
+                  properties:
+                    cpu:
+                      type: string
+                      description: CPU limit
+                    memory:
+                      type: string
+                      description: Memory limit
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                healthCheck:
+                  type: object
+                  description: Health check configuration
+                  properties:
+                    path:
+                      type: string
+                      default: /health
+                    initialDelaySeconds:
+                      type: integer
+                      format: int32
+                      default: 5
+                    periodSeconds:
+                      type: integer
+                      format: int32
+                      default: 10
+                    failureThreshold:
+                      type: integer
+                      format: int32
+                      default: 3
+                serviceAccountName:
+                  type: string
+                  description: Kubernetes service account to use
+                imagePullSecrets:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                    required:
+                      - name
+                nodeSelector:
+                  type: object
+                  additionalProperties:
+                    type: string
+                tolerations:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                storage:
+                  type: array
+                  description: Persistent storage configuration
+                  items:
+                    type: object
+                    required:
+                      - name
+                      - mountPath
+                    properties:
+                      name:
+                        type: string
+                        description: Identifier for this storage mount
+                      mountPath:
+                        type: string
+                        description: Path to mount the storage in the container
+                      size:
+                        type: string
+                        description: Requested storage size (e.g., "1Gi", "10Gi")
+                      storageClassName:
+                        type: string
+                        description: Storage class to use (must support RWX for multi-replica)
+                      accessMode:
+                        type: string
+                        enum: [ReadWriteOnce, ReadWriteMany, ReadOnlyMany]
+                        default: ReadWriteMany
+                        description: Access mode for the PVC
+                      existingClaim:
+                        type: string
+                        description: Use an existing PVC instead of creating one
+                      subPath:
+                        type: string
+                        description: Subdirectory within the volume to mount
+                      readOnly:
+                        type: boolean
+                        default: false
+                        description: Mount the volume as read-only
+                ingress:
+                  type: object
+                  description: External access configuration
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: false
+                      description: Whether to create an Ingress
+                    host:
+                      type: string
+                      description: Hostname for the Ingress (required if enabled)
+                    path:
+                      type: string
+                      default: /
+                      description: URL path prefix
+                    pathType:
+                      type: string
+                      enum: [Prefix, Exact, ImplementationSpecific]
+                      default: Prefix
+                      description: How the path should be matched
+                    tls:
+                      type: boolean
+                      default: false
+                      description: Enable HTTPS with automatic certificate
+                    ingressClassName:
+                      type: string
+                      description: Which Ingress controller to use
+                    annotations:
+                      type: object
+                      additionalProperties:
+                        type: string
+                      description: Annotations for the Ingress resource
+                suspend:
+                  type: boolean
+                  default: false
+                  description: Suspend pauses the app
+            status:
+              type: object
+              description: PrisnAppStatus defines the observed state
+              properties:
+                phase:
+                  type: string
+                  enum: [Pending, Building, Running, Failed, Suspended]
+                replicas:
+                  type: integer
+                  format: int32
+                readyReplicas:
+                  type: integer
+                  format: int32
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                observedGeneration:
+                  type: integer
+                  format: int64
+                lastTransitionTime:
+                  type: string
+                  format: date-time
+                message:
+                  type: string
+                serviceName:
+                  type: string
+                deploymentName:
+                  type: string
+                envHash:
+                  type: string

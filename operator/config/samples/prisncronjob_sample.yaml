@@ -1,0 +1,153 @@
+---
+# Example 1: Hourly metrics collection
+apiVersion: prisn.io/v1alpha1
+kind: PrisnCronJob
+metadata:
+  name: metrics-collector
+spec:
+  schedule: "0 * * * *"  # Every hour
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    runtime: python3
+    source:
+      inline: |
+        import json
+        from datetime import datetime
+
+        metrics = {
+            "timestamp": datetime.now().isoformat(),
+            "cpu_usage": 45.2,
+            "memory_usage": 62.8,
+            "request_count": 1523
+        }
+
+        print(f"Collected metrics: {json.dumps(metrics)}")
+      entrypoint: script
+    timeout: 5m
+    resources:
+      cpu: "100m"
+      memory: "64Mi"
+
+---
+# Example 2: Daily database cleanup
+apiVersion: prisn.io/v1alpha1
+kind: PrisnCronJob
+metadata:
+  name: db-cleanup
+spec:
+  schedule: "0 3 * * *"  # 3 AM daily
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    runtime: python3
+    source:
+      inline: |
+        import os
+        from datetime import datetime, timedelta
+
+        print(f"Database cleanup starting at {datetime.now()}")
+
+        # Simulate cleanup of old records
+        retention_days = int(os.environ.get('RETENTION_DAYS', '30'))
+        cutoff_date = datetime.now() - timedelta(days=retention_days)
+
+        print(f"Deleting records older than {cutoff_date}")
+        print("Cleaning up audit_logs table...")
+        print("Cleaning up session_data table...")
+        print("Cleaning up temp_files table...")
+
+        print("Cleanup completed successfully!")
+      entrypoint: script
+    env:
+      - name: RETENTION_DAYS
+        value: "30"
+    timeout: 30m
+    backoffLimit: 2
+    resources:
+      cpu: "200m"
+      memory: "256Mi"
+
+---
+# Example 3: Weekly report generation
+apiVersion: prisn.io/v1alpha1
+kind: PrisnCronJob
+metadata:
+  name: weekly-report
+spec:
+  schedule: "0 9 * * 1"  # 9 AM every Monday
+  concurrencyPolicy: Replace
+  suspend: false
+  successfulJobsHistoryLimit: 4
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    runtime: python3
+    source:
+      inline: |
+        import json
+        from datetime import datetime, timedelta
+
+        today = datetime.now()
+        week_start = today - timedelta(days=7)
+
+        report = {
+            "period": f"{week_start.strftime('%Y-%m-%d')} to {today.strftime('%Y-%m-%d')}",
+            "total_users": 15234,
+            "new_signups": 523,
+            "revenue": 45678.90,
+            "top_features": ["dashboard", "reports", "api"]
+        }
+
+        print("Weekly Report Generated")
+        print("=" * 40)
+        print(json.dumps(report, indent=2))
+
+        # In real scenario, send email or upload to S3
+        print("\nReport sent to stakeholders!")
+      entrypoint: script
+    env:
+      - name: REPORT_EMAIL
+        value: "reports@example.com"
+    timeout: 1h
+    resources:
+      cpu: "500m"
+      memory: "512Mi"
+
+---
+# Example 4: Every 5 minutes health check
+apiVersion: prisn.io/v1alpha1
+kind: PrisnCronJob
+metadata:
+  name: health-monitor
+spec:
+  schedule: "*/5 * * * *"  # Every 5 minutes
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    runtime: bash
+    source:
+      inline: |
+        #!/bin/bash
+        set -e
+
+        echo "Running health checks at $(date)"
+
+        # Check API endpoint
+        echo "Checking API..."
+        curl -sf http://api.default.svc:8080/health || exit 1
+
+        # Check database
+        echo "Checking database..."
+        # nc -z postgresql.default.svc 5432 || exit 1
+
+        echo "All health checks passed!"
+      entrypoint: script
+    timeout: 2m
+    ttlSecondsAfterFinished: 300
+    resources:
+      cpu: "50m"
+      memory: "32Mi"

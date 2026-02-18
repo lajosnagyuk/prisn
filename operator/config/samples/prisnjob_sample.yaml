@@ -1,0 +1,105 @@
+---
+# Example 1: Simple one-time job
+apiVersion: prisn.io/v1alpha1
+kind: PrisnJob
+metadata:
+  name: data-migration
+spec:
+  runtime: python3
+  source:
+    inline: |
+      import os
+      import time
+
+      print("Starting data migration...")
+
+      # Simulate migration work
+      for i in range(5):
+          print(f"Processing batch {i+1}/5...")
+          time.sleep(2)
+
+      print("Migration completed successfully!")
+    entrypoint: script
+  timeout: 10m
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 3600
+  resources:
+    cpu: "500m"
+    memory: "256Mi"
+
+---
+# Example 2: Database backup job with environment variables
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-credentials
+type: Opaque
+stringData:
+  DB_HOST: "postgresql.default.svc"
+  DB_USER: "backup_user"
+  DB_PASSWORD: "secret123"
+---
+apiVersion: prisn.io/v1alpha1
+kind: PrisnJob
+metadata:
+  name: db-backup
+spec:
+  runtime: bash
+  source:
+    inline: |
+      #!/bin/bash
+      set -e
+
+      echo "Starting database backup..."
+      echo "Connecting to: $DB_HOST"
+
+      # Simulate backup (in real scenario, use pg_dump)
+      echo "Dumping database..."
+      sleep 5
+
+      echo "Compressing backup..."
+      sleep 2
+
+      echo "Uploading to S3..."
+      sleep 3
+
+      echo "Backup completed: backup-$(date +%Y%m%d-%H%M%S).sql.gz"
+    entrypoint: script
+  envFrom:
+    - secretRef:
+        name: db-credentials
+  env:
+    - name: BACKUP_BUCKET
+      value: "s3://my-backups"
+  timeout: 30m
+  backoffLimit: 3
+  resources:
+    cpu: "1"
+    memory: "512Mi"
+
+---
+# Example 3: ETL job from Git repository
+apiVersion: prisn.io/v1alpha1
+kind: PrisnJob
+metadata:
+  name: etl-pipeline
+spec:
+  runtime: python3
+  source:
+    git:
+      url: https://github.com/example/etl-scripts.git
+      ref: main
+      path: pipelines
+    entrypoint: daily_etl.py
+  args:
+    - "--date"
+    - "2024-01-01"
+    - "--full-refresh"
+  env:
+    - name: WAREHOUSE_URL
+      value: "https://warehouse.example.com"
+  timeout: 2h
+  backoffLimit: 1
+  resources:
+    cpu: "2"
+    memory: "2Gi"

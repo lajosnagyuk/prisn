@@ -1,0 +1,213 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: prisncronjobs.prisn.io
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+spec:
+  group: prisn.io
+  names:
+    kind: PrisnCronJob
+    listKind: PrisnCronJobList
+    plural: prisncronjobs
+    singular: prisncronjob
+    shortNames:
+      - pcj
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Schedule
+          type: string
+          jsonPath: .spec.schedule
+        - name: Suspend
+          type: boolean
+          jsonPath: .spec.suspend
+        - name: Active
+          type: integer
+          jsonPath: .status.active
+        - name: Last Schedule
+          type: date
+          jsonPath: .status.lastScheduleTime
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: PrisnCronJob is the Schema for the prisncronjobs API
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              description: PrisnCronJobSpec defines the desired state
+              required:
+                - schedule
+                - jobTemplate
+              properties:
+                schedule:
+                  type: string
+                  description: Schedule in Cron format (or @hourly, @daily, etc.)
+                jobTemplate:
+                  type: object
+                  description: JobTemplate defines the job to create
+                  required:
+                    - source
+                  properties:
+                    source:
+                      type: object
+                      properties:
+                        inline:
+                          type: string
+                        configMapRef:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                          required:
+                            - name
+                        secretRef:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                          required:
+                            - name
+                        git:
+                          type: object
+                          required:
+                            - url
+                          properties:
+                            url:
+                              type: string
+                            ref:
+                              type: string
+                              default: main
+                            path:
+                              type: string
+                            secretRef:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                        entrypoint:
+                          type: string
+                    runtime:
+                      type: string
+                      enum: [python, python3, node, bash]
+                      default: python3
+                    args:
+                      type: array
+                      items:
+                        type: string
+                    env:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                    envFrom:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                    resources:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                        requests:
+                          type: object
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
+                    timeout:
+                      type: string
+                      default: 1h
+                    backoffLimit:
+                      type: integer
+                      format: int32
+                      minimum: 0
+                      default: 3
+                    ttlSecondsAfterFinished:
+                      type: integer
+                      format: int32
+                      minimum: 0
+                    serviceAccountName:
+                      type: string
+                    nodeSelector:
+                      type: object
+                      additionalProperties:
+                        type: string
+                    tolerations:
+                      type: array
+                      items:
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                concurrencyPolicy:
+                  type: string
+                  enum: [Allow, Forbid, Replace]
+                  default: Forbid
+                  description: How to treat concurrent executions
+                suspend:
+                  type: boolean
+                  default: false
+                  description: Suspend prevents new executions
+                successfulJobsHistoryLimit:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                  default: 3
+                  description: How many successful jobs to keep
+                failedJobsHistoryLimit:
+                  type: integer
+                  format: int32
+                  minimum: 0
+                  default: 1
+                  description: How many failed jobs to keep
+                startingDeadlineSeconds:
+                  type: integer
+                  format: int64
+                  description: Deadline for starting a missed job
+            status:
+              type: object
+              description: PrisnCronJobStatus defines the observed state
+              properties:
+                active:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  description: List of currently running jobs
+                lastScheduleTime:
+                  type: string
+                  format: date-time
+                lastSuccessfulTime:
+                  type: string
+                  format: date-time
+                nextScheduleTime:
+                  type: string
+                  format: date-time
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                observedGeneration:
+                  type: integer
+                  format: int64

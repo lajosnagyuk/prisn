@@ -1,0 +1,57 @@
+# Binaries
+prisn
+prisn-*
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test binaries
+*.test
+
+# Output of go build
+*.out
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# Local development
+*.db
+*.sqlite
+*.log
+*.tmp
+*.pid
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+config.toml
+secrets/
+
+# Coverage
+coverage.out
+coverage.html
+
+# Claude Code
+.claude/
