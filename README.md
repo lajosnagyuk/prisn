@@ -139,7 +139,8 @@ For Kubernetes-native deployment, use the prisn operator:
 
 ```bash
 # Install CRDs and operator
-kubectl apply -k github.com/lajosnagyuk/prisn/operator/config/default
+git clone https://github.com/lajosnagyuk/prisn.git
+kubectl apply -k prisn/operator/config/default
 
 # Deploy an app
 kubectl apply -f - << 'EOF'

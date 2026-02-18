@@ -160,7 +160,9 @@ func (r *PrisnAppReconciler) reconcileSuspended(ctx context.Context, app *prisnv
 		if apierrors.IsNotFound(err) {
 			// No deployment to scale down
 			r.setPhase(ctx, app, "Suspended", "App is suspended")
-			return ctrl.Result{}, nil
+			app.Status.Replicas = 0
+			app.Status.ReadyReplicas = 0
+			return ctrl.Result{}, r.Status().Update(ctx, app)
 		}
 		return ctrl.Result{}, err
 	}
@@ -176,7 +178,9 @@ func (r *PrisnAppReconciler) reconcileSuspended(ctx context.Context, app *prisnv
 	}
 
 	r.setPhase(ctx, app, "Suspended", "App is suspended")
-	return ctrl.Result{}, nil
+	app.Status.Replicas = deploy.Status.Replicas
+	app.Status.ReadyReplicas = deploy.Status.ReadyReplicas
+	return ctrl.Result{}, r.Status().Update(ctx, app)
 }
 
 // reconcileSource ensures the source code is available

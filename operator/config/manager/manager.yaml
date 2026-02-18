@@ -36,8 +36,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: manager
-          image: ghcr.io/prisn/prisn-operator:latest
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/lajosnagyuk/prisn-operator:latest
+          imagePullPolicy: Always
           command:
             - /prisn-operator
           args:

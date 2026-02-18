@@ -9,6 +9,6 @@ resources:
   - ../manager
 
 images:
-  - name: ghcr.io/prisn/prisn-operator
-    newName: ghcr.io/prisn/prisn-operator
+  - name: ghcr.io/lajosnagyuk/prisn-operator
+    newName: ghcr.io/lajosnagyuk/prisn-operator
     newTag: latest

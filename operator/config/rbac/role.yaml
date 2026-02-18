@@ -30,6 +30,16 @@ rules:
     resources: ["services"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 
+  # PersistentVolumeClaims (for storage)
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Ingresses (for external access)
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
   # ConfigMaps and Secrets (for source code)
   - apiGroups: [""]
     resources: ["configmaps"]

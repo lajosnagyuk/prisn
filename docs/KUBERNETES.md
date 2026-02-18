@@ -7,12 +7,21 @@ prisn provides a native Kubernetes operator for running scripts and services in 
 ### Install the Operator
 
 ```bash
-# Install CRDs and operator
-kubectl apply -k github.com/lajosnagyuk/prisn/operator/config/default
+# Clone and install CRDs + operator
+git clone https://github.com/lajosnagyuk/prisn.git
+kubectl apply -k prisn/operator/config/default
 
 # Verify installation
 kubectl get pods -n prisn-system
 kubectl get crds | grep prisn
+```
+
+The operator image defaults to `ghcr.io/lajosnagyuk/prisn-operator:latest`. To use
+a custom image (e.g., from a private registry), override after install:
+
+```bash
+kubectl -n prisn-system set image deployment/prisn-operator \
+  manager=your-registry.example.com/prisn-operator:v0.1.0
 ```
 
 ### Deploy Your First App
@@ -426,10 +435,10 @@ kubectl edit prisnapp my-api
 
 ```bash
 # Suspend (scales to 0, preserves config)
-kubectl patch prisnapp my-api -p '{"spec":{"suspend":true}}'
+kubectl patch prisnapp my-api --type=merge -p '{"spec":{"suspend":true}}'
 
 # Resume
-kubectl patch prisnapp my-api -p '{"spec":{"suspend":false}}'
+kubectl patch prisnapp my-api --type=merge -p '{"spec":{"suspend":false}}'
 ```
 
 ## Troubleshooting
